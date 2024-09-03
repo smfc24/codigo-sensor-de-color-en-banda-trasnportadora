@@ -1,0 +1,1 @@
+# codigo-sensor-de-color-en-banda-trasnportadora
