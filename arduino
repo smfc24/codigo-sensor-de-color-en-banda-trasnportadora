@@ -1,0 +1,411 @@
+int ancho = 128;               // ancho pantalla en puntos
+int alto = 64; 
+unsigned datoazul;
+unsigned datoblanco;
+unsigned datorojo;
+unsigned objblanco;
+unsigned objazul;
+unsigned objrojo;
+
+int salidaexpulsion;
+const int barrera_de_luz1 = 2; // sensor 1
+const int salida_barrera_deluz= 3; 
+
+unsigned motor;
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(ancho, alto, &Wire, -1);
+
+unsigned long tiempoInicio;  
+
+const int s0 = 4;
+const int s1 = 5;
+const int s2 = 6;
+const int s3 = 7;
+const int out = 8;
+int compresor=10;
+int valv_rojo=16;
+int valv_azul=15;
+int valv_blanco=9;
+int blanco = 43;
+int azul =45;
+int rojo=47;
+
+int barrera;
+
+void setup() {
+Serial.begin(9600);
+
+pinMode(s0, OUTPUT);
+ pinMode(s1, OUTPUT);
+ pinMode(s2, OUTPUT);
+ pinMode(s3, OUTPUT);
+ pinMode(out, INPUT);
+objrojo=0;
+objblanco=0;
+objazul=0;
+ digitalWrite(s0, HIGH);
+ digitalWrite(s1, HIGH);
+ motor=1024;
+salidaexpulsion=0;
+barrera=0;
+pinMode(compresor,OUTPUT);
+pinMode(valv_rojo,OUTPUT);
+pinMode(valv_azul,OUTPUT);
+pinMode(valv_blanco,OUTPUT);
+pinMode(18, INPUT); // sensores asignados como entradas
+pinMode(2, INPUT);
+pinMode(A0, OUTPUT);
+pinMode(azul,OUTPUT);
+pinMode(rojo,OUTPUT);
+pinMode(blanco,OUTPUT);
+
+//interrupciones
+attachInterrupt(digitalPinToInterrupt(2), entrada_B, FALLING);// activacion interrupcion externa sensor 1
+attachInterrupt(digitalPinToInterrupt(18), salida_B, FALLING);
+if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) 
+   {  while (true);  }
+}
+ 
+void loop(){
+unsigned long tiempoActual = millis();
+digitalWrite(blanco,LOW);
+digitalWrite(rojo,LOW);
+digitalWrite(azul,LOW);
+  
+     
+motor=1024; 
+analogWrite(A0,motor);
+
+    display.clearDisplay();
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 1);              // Posición del texto en puntos
+    display.println( "banda en movimiento");               // Imprimimos la frase
+
+   display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 40);              // Posición del texto en puntos
+    display.println( "azul:" ); 
+ display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 40);              // Posición del texto en puntos
+    display.println( objazul);
+
+    
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 20);              // Posición del texto en puntos
+    display.println( "blanco:");
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(45, 20);              // Posición del texto en puntos
+    display.println( objblanco);
+    
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 30);              // Posición del texto en puntos
+    display.println( "rojo:");
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 30);              // Posición del texto en puntos
+    display.println( objrojo);
+    // Imprimimos la frase
+    display.display();
+    
+
+
+
+   if(barrera==1)//interrupcion barrera de luz de entrada
+   {
+   display.clearDisplay(); 
+//  frase = "producto en banda";
+  display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(0, 1);              // Posición del texto en puntos
+  display.println("producto en banda");   
+
+
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 40);              // Posición del texto en puntos
+    display.println( "azul:" ); 
+ display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 40);              // Posición del texto en puntos
+    display.println( objazul);
+
+    
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 20);              // Posición del texto en puntos
+    display.println( "blanco:");
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(45, 20);              // Posición del texto en puntos
+    display.println( objblanco);
+    
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 30);              // Posición del texto en puntos
+    display.println( "rojo:");
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 30);              // Posición del texto en puntos
+    display.println( objrojo);
+  // Imprimimos la frase
+  display.display();  
+  delay(2000); 
+  motor=0;
+  analogWrite(A0,motor);
+   barrera=0; 
+
+//sensor de color activacion
+
+  //frase = "tomando datos sensor de color";
+  display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(8, 8);              // Posición del texto en puntos
+  display.println("tomando datos ");
+             
+ 
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 40);              // Posición del texto en puntos
+    display.println( "azul:" ); 
+ display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 40);              // Posición del texto en puntos
+    display.println( objazul);
+
+    
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 20);              // Posición del texto en puntos
+    display.println( "blanco:");
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(45, 20);              // Posición del texto en puntos
+    display.println( objblanco);
+    
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 30);              // Posición del texto en puntos
+    display.println( "rojo:");
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 30);              // Posición del texto en puntos
+    display.println( objrojo);
+  
+  // Imprimimos la frase
+  display.display();
+  
+          sensorcolor();
+       barrera=0;
+    salidaexpulsion=0;   
+ }
+
+
+     if(salidaexpulsion>0)//interrupcion barreara de luz de salida 
+   {
+  
+   display.clearDisplay();
+  display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(0, 1);              // Posición del texto en puntos
+  display.println("producto en banda"); 
+  
+
+   display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 40);              // Posición del texto en puntos
+    display.println( "azul:" ); 
+ display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 40);              // Posición del texto en puntos
+    display.println( objazul);
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 20);              // Posición del texto en puntos
+    display.println( "blanco:");
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(45, 20);              // Posición del texto en puntos
+    display.println( objblanco);
+    
+    display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(0, 30);              // Posición del texto en puntos
+    display.println( "rojo:");
+     display.setTextSize(1);               // Tamaño del texto  
+    display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+    display.setCursor(35, 30);              // Posición del texto en puntos
+    display.println( objrojo);
+
+salidaexpulsion=0; 
+  barrera=0;
+   
+  // Imprimimos la frase
+
+  expulsion(); 
+  
+  
+   }
+}
+
+
+void entrada_B(){
+barrera=barrera+1;
+}
+
+
+void salida_B(){
+salidaexpulsion=salidaexpulsion+1;           
+}
+
+
+void sensorcolor(){
+  
+  
+  // Bucle for que durará aproximadamente 10 segundos
+for (int i = 0; i < 10; i++)  {
+ 
+  int R = getRojo();
+delay(200);
+int V = getVerde();
+delay(200);
+int A = getAzul();
+delay(200);
+
+Serial.print("Int R "+ String(R));
+Serial.print("  --  Int V "+ String(V));
+Serial.print("  --  Int Z "+ String(A));
+
+  
+  if (R > 41 && R <= 47 && V >= 37  && V < 43 && A >=17 && A < 27 ) {
+    Serial.print("  EL COLOR ES AZUL de millos ");
+    digitalWrite(45, HIGH);
+    datoazul++;
+       objazul=objazul+1;
+    return;
+
+  }
+  
+else if (R > 13 && R <= 22 && V >= 30 && V < 40 && A >=27 && A < 33 ) {
+   Serial.print("  EL COLOR ES ROJO");
+   digitalWrite(rojo, HIGH);
+datorojo++;
+ objrojo=objrojo+1;
+return;
+  }
+  else if (R >5 && R <= 10 && V >= 4 && V < 10 && A >=6 && A < 10 ) {
+    Serial.print("  EL COLOR ES BLANCO");
+    digitalWrite(43, HIGH);
+ datoblanco++;
+   objblanco=objblanco+1;
+ return;
+  }
+  else
+  {
+    Serial.print("  EL COLOR NO HA SIDO REGISTRADO");
+    digitalWrite(rojo, LOW);
+    digitalWrite(azul, LOW);
+    digitalWrite(blanco, LOW);
+  }
+  Serial.println(" ");
+ }return;
+ }
+
+
+
+
+
+
+
+ 
+
+
+
+void expulsion(){
+  if(datoblanco>datoazul && datoblanco>datorojo){
+   delay(3000); 
+  motor=0;
+  analogWrite(A0,motor);
+  digitalWrite(compresor,HIGH);
+  digitalWrite(valv_blanco, HIGH);
+   display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(8, 8);              // Posición del texto en puntos
+  display.println("expulsion blanco ");
+  display.display(); 
+  delay(500);
+   digitalWrite(compresor,LOW);
+  digitalWrite(valv_blanco, LOW);
+  
+  }
+
+if(datoazul>=1){
+   delay(1000); 
+  motor=0;
+  analogWrite(A0,motor);
+  digitalWrite(compresor,HIGH);
+  digitalWrite(valv_azul, HIGH);
+  datoazul=0;
+   display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(8, 8);              // Posición del texto en puntos
+  display.println("expulsion azul ");
+  display.display(); 
+  delay(500);
+   digitalWrite(compresor,LOW);
+  digitalWrite(valv_azul, LOW);
+  }
+
+if(datorojo>=1){
+   delay(2000); 
+ motor=0;
+  analogWrite(A0,motor);
+  digitalWrite(compresor,HIGH);
+  digitalWrite(valv_rojo, HIGH);
+  datorojo=0;
+ display.setTextSize(1);               // Tamaño del texto  
+  display.setTextColor(SSD1306_WHITE);  // Color WHITE para que se vea el texto, el color sera el del propio lcd
+  display.setCursor(8, 8);              // Posición del texto en puntos
+  display.println("expulsion rojo");
+    display.display(); 
+  delay(500);
+   digitalWrite(compresor,LOW);
+  digitalWrite(valv_rojo, LOW);
+  
+  }
+  datoblanco=0;
+
+
+
+salidaexpulsion=0;
+}
+
+
+int getRojo(){
+  //leer color rojo
+  digitalWrite(s2, LOW);
+  digitalWrite(s3, LOW);
+  int ROJO = pulseIn(out, LOW);
+  return ROJO;
+}
+
+int getAzul(){
+  //leer color azul
+  digitalWrite(s2, LOW);
+  digitalWrite(s3, HIGH);
+  int AZUL = pulseIn(out, LOW);
+  return AZUL;
+}
+
+int getVerde(){
+  //leer color verde
+  digitalWrite(s2, HIGH);
+  digitalWrite(s3, HIGH);
+  int VERDE = pulseIn(out, LOW);
+  return VERDE;
+}
