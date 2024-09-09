@@ -1,0 +1,53 @@
+const int inputPin = 22;
+const int inputPin2 = 23;
+const int inputPin3 = 24; // Pin de entrada en el Arduino Mega
+int previousState = LOW;
+int previousState2 = LOW;
+int previousState3 = LOW;
+int count = 0;
+unsigned objblanco=0;
+unsigned objazul=0;
+unsigned objrojo=0;
+
+
+void setup() {
+  pinMode(inputPin, INPUT);
+    pinMode(inputPin2, INPUT);
+      pinMode(inputPin3, INPUT);
+  Serial.begin(115200); // Comunicación serial con el ESP8266
+}
+
+void loop() {
+  int currentState = digitalRead(inputPin);
+int currentState2 = digitalRead(inputPin2);
+int currentState3 = digitalRead(inputPin3);
+
+  if (currentState == HIGH && previousState == LOW) {
+    objblanco++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
+    Serial.print("COUNT:");
+    Serial.println(objblanco);
+    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
+  }
+
+
+
+   if (currentState2 == HIGH && previousState2 == LOW) {
+    objazul++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
+    Serial.print("COUNT:");
+    Serial.println(objazul);
+    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
+  }
+
+
+
+   if (currentState3 == HIGH && previousState3 == LOW) {
+    objrojo++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
+    Serial.print("COUNT:");
+    Serial.println(objrojo);
+    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
+  }
+
+  previousState = currentState;
+   previousState2 = currentState2;
+    previousState3 = currentState3;
+}
