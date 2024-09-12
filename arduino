@@ -1,49 +1,48 @@
-int ancho = 128;               // ancho pantalla en puntos
+
+int ancho = 128;              
 int alto = 64; 
-unsigned datoazul;
-unsigned datoblanco;
-unsigned datorojo;
-unsigned objblanco;
-unsigned objazul;
-unsigned objrojo;
+int datoazul;
+int datoblanco;
+int datorojo;
+int objblanco=0;
+int objazul=0;
+int objrojo=0;
 
 int salidaexpulsion;
 const int barrera_de_luz1 = 2; // sensor 1
 const int salida_barrera_deluz= 3; 
 
-unsigned motor;
+int motor;
 #include <Adafruit_SSD1306.h>
 
 Adafruit_SSD1306 display(ancho, alto, &Wire, -1);
 
-unsigned long tiempoInicio;  
+  
 
 const int s0 = 4;
 const int s1 = 5;
 const int s2 = 6;
 const int s3 = 7;
 const int out = 8;
-int compresor=10;
-int valv_rojo=16;
-int valv_azul=15;
-int valv_blanco=9;
+int compresor=39;
+int valv_rojo=40;
+int valv_azul=41;
+int valv_blanco=42;
 int blanco = 43;
 int azul =45;
 int rojo=47;
-
+const int inputPin2 = 23; 
 int barrera;
-
+int paginaweb;
 void setup() {
-Serial.begin(9600);
+Serial.begin(115200);
 
 pinMode(s0, OUTPUT);
  pinMode(s1, OUTPUT);
  pinMode(s2, OUTPUT);
  pinMode(s3, OUTPUT);
  pinMode(out, INPUT);
-objrojo=0;
-objblanco=0;
-objazul=0;
+
  digitalWrite(s0, HIGH);
  digitalWrite(s1, HIGH);
  motor=1024;
@@ -53,27 +52,41 @@ pinMode(compresor,OUTPUT);
 pinMode(valv_rojo,OUTPUT);
 pinMode(valv_azul,OUTPUT);
 pinMode(valv_blanco,OUTPUT);
-pinMode(18, INPUT); // sensores asignados como entradas
+pinMode(3, INPUT); // sensores asignados como entradas
 pinMode(2, INPUT);
 pinMode(A0, OUTPUT);
 pinMode(azul,OUTPUT);
 pinMode(rojo,OUTPUT);
 pinMode(blanco,OUTPUT);
-
+  pinMode(inputPin2, INPUT);
 //interrupciones
 attachInterrupt(digitalPinToInterrupt(2), entrada_B, FALLING);// activacion interrupcion externa sensor 1
-attachInterrupt(digitalPinToInterrupt(18), salida_B, FALLING);
+attachInterrupt(digitalPinToInterrupt(3), salida_B, FALLING);
 if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) 
    {  while (true);  }
 }
  
 void loop(){
-unsigned long tiempoActual = millis();
+
 digitalWrite(blanco,LOW);
 digitalWrite(rojo,LOW);
 digitalWrite(azul,LOW);
-  
-     
+
+ if(paginaweb=1){
+Serial.print("COUNT1:");
+    Serial.println(objrojo);
+    delay(100); 
+   Serial.print("COUNT2:");
+    Serial.println(objblanco);
+    delay(100);
+     Serial.print("COUNT3:");
+    Serial.println(objazul);
+    delay(100);
+    paginaweb=0;
+ }
+   
+   
+
 motor=1024; 
 analogWrite(A0,motor);
 
@@ -116,7 +129,7 @@ analogWrite(A0,motor);
 
 
 
-   if(barrera==1)//interrupcion barrera de luz de entrada
+   if(barrera>=1)//interrupcion barrera de luz de entrada
    {
    display.clearDisplay(); 
 //  frase = "producto en banda";
@@ -155,7 +168,7 @@ analogWrite(A0,motor);
     display.println( objrojo);
   // Imprimimos la frase
   display.display();  
-  delay(2000); 
+  delay(1300); 
   motor=0;
   analogWrite(A0,motor);
    barrera=0; 
@@ -248,7 +261,7 @@ salidaexpulsion=0;
   // Imprimimos la frase
 
   expulsion(); 
-  
+  delay(2000); 
   
    }
 }
@@ -256,11 +269,17 @@ salidaexpulsion=0;
 
 void entrada_B(){
 barrera=barrera+1;
+salidaexpulsion=0; 
+
+    
 }
 
 
 void salida_B(){
-salidaexpulsion=salidaexpulsion+1;           
+salidaexpulsion=salidaexpulsion+1; 
+   barrera=0; 
+      Serial.print("COUNT2:");
+    Serial.println(objblanco);      
 }
 
 
@@ -268,7 +287,7 @@ void sensorcolor(){
   
   
   // Bucle for que durará aproximadamente 10 segundos
-for (int i = 0; i < 10; i++)  {
+for (int jj = 0; jj < 10; jj++)  {
  
   int R = getRojo();
 delay(200);
@@ -279,30 +298,38 @@ delay(200);
 
 Serial.print("Int R "+ String(R));
 Serial.print("  --  Int V "+ String(V));
-Serial.print("  --  Int Z "+ String(A));
+Serial.print("  --  Int A "+ String(A));
 
   
-  if (R > 41 && R <= 47 && V >= 37  && V < 43 && A >=17 && A < 27 ) {
+  if (R > 55 && R <= 69 && V >= 50  && V < 60&& A >= 27 && A < 38 ) {
     Serial.print("  EL COLOR ES AZUL de millos ");
     digitalWrite(45, HIGH);
     datoazul++;
        objazul=objazul+1;
+     paginaweb=1;
+          Serial.print("COUNT3:");
+    Serial.println(objazul);
+    delay(100); 
     return;
 
   }
   
-else if (R > 13 && R <= 22 && V >= 30 && V < 40 && A >=27 && A < 33 ) {
+else if (R > 16 && R <= 22 && V >= 40 && V < 56 && A >=32 && A < 43 ) {
    Serial.print("  EL COLOR ES ROJO");
    digitalWrite(rojo, HIGH);
 datorojo++;
  objrojo=objrojo+1;
+  paginaweb=1;
 return;
   }
-  else if (R >5 && R <= 10 && V >= 4 && V < 10 && A >=6 && A < 10 ) {
+  else if (R >9 && R <= 17 && V >= 11 && V < 16 && A >=7 && A < 16 ) {
     Serial.print("  EL COLOR ES BLANCO");
     digitalWrite(43, HIGH);
+    paginaweb=1;
  datoblanco++;
    objblanco=objblanco+1;
+    Serial.print("COUNT2:");
+    Serial.println(objblanco);
  return;
   }
   else
@@ -311,6 +338,7 @@ return;
     digitalWrite(rojo, LOW);
     digitalWrite(azul, LOW);
     digitalWrite(blanco, LOW);
+    
   }
   Serial.println(" ");
  }return;
@@ -328,7 +356,7 @@ return;
 
 void expulsion(){
   if(datoblanco>datoazul && datoblanco>datorojo){
-   delay(3000); 
+   delay(200); 
   motor=0;
   analogWrite(A0,motor);
   digitalWrite(compresor,HIGH);
@@ -341,11 +369,11 @@ void expulsion(){
   delay(500);
    digitalWrite(compresor,LOW);
   digitalWrite(valv_blanco, LOW);
-  
+   datoblanco=0;
   }
 
 if(datoazul>=1){
-   delay(1000); 
+   delay(900); 
   motor=0;
   analogWrite(A0,motor);
   digitalWrite(compresor,HIGH);
@@ -378,7 +406,7 @@ if(datorojo>=1){
   digitalWrite(valv_rojo, LOW);
   
   }
-  datoblanco=0;
+ 
 
 
 
