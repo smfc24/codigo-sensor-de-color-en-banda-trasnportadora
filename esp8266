@@ -1,53 +1,86 @@
-const int inputPin = 22;
-const int inputPin2 = 23;
-const int inputPin3 = 24; // Pin de entrada en el Arduino Mega
-int previousState = LOW;
-int previousState2 = LOW;
-int previousState3 = LOW;
-int count = 0;
-unsigned objblanco=0;
-unsigned objazul=0;
-unsigned objrojo=0;
 
+
+
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+const char* ssid = "MILLOS 6400";       // Cambia por el nombre de tu red Wi-Fi
+const char* password = "watermajor482";   // Cambia por la contraseña de tu red Wi-Fi
+
+ESP8266WebServer server(80); // Crea un servidor en el puerto 80
+
+int objblanco=0;
+int objazul=0;
+int objrojo=0;
+
+void handleRoot() {
+ 
+  
+   String message = "<h1>Contadores de productos </h1>";
+  message += "<p>Contador productos rojo: " + String(objrojo) + "</p>";
+  message += "<p>Contador productos blanco: " + String(objblanco) + "</p>";
+  message += "<p>Contador productos azul: " + String(objazul) + "</p>";
+  message += "<img src='https://millonarios.com.co/wp-content/uploads/2024/09/Millonarios_vs_Patriotas-69-Falcao-300x240.jpg' alt='Imagen de Falcao' width='300' height='240' /> </p>";
+message += "<p><iframe width='560' height='315' src='https://www.youtube.com/embed/HKZ-qUX50UU' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>";
+
+  
+  server.send(200, "text/html", message);
+}
+
+void handleUpdateCount() {
+  if (server.hasArg("count1") && server.hasArg("count2") && server.hasArg("count3")) {
+    objrojo = server.arg("count1").toInt();
+    objblanco = server.arg("count2").toInt();
+    objazul = server.arg("count3").toInt();
+    String  message = "<p>Contador productos rojo: " + String(objrojo) + "</p>";
+    message += "<p>Contador productos blanco: " + String(objblanco) + "</p>";
+    message += "<p>Contador productos azul: " + String(objazul) + "</p>";
+    server.send(200, "text/html", message);
+  } else {
+    server.send(400, "text/html", "Bad Request: Missing count parameters");
+  }
+}
 
 void setup() {
-  pinMode(inputPin, INPUT);
-    pinMode(inputPin2, INPUT);
-      pinMode(inputPin3, INPUT);
-  Serial.begin(115200); // Comunicación serial con el ESP8266
+  Serial.begin(115200); // Comunicación serial con el Arduino
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected to WiFi");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+
+  server.on("/", handleRoot);
+  server.on("/update_count", HTTP_GET, handleUpdateCount);
+
+  server.begin();
 }
 
 void loop() {
-  int currentState = digitalRead(inputPin);
-int currentState2 = digitalRead(inputPin2);
-int currentState3 = digitalRead(inputPin3);
+  server.handleClient();
 
-  if (currentState == HIGH && previousState == LOW) {
-    objblanco++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
-    Serial.print("COUNT:");
-    Serial.println(objblanco);
-    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
+  if (Serial.available()) {
+    String message = Serial.readStringUntil('\n');
+    Serial.print("Received: ");
+    Serial.println(message); // Muestra el mensaje recibido en el Monitor Serial
+
+    if (message.startsWith("COUNT1:")) {
+      String countStr = message.substring(7); // Extrae el valor del contador 1
+      objrojo = countStr.toInt();
+    } else if (message.startsWith("COUNT2:")) {
+      String countStr = message.substring(7); // Extrae el valor del contador 2
+     objblanco = countStr.toInt();
+    } else if (message.startsWith("COUNT3:")) {
+      String countStr = message.substring(7); // Extrae el valor del contador 3
+      objazul = countStr.toInt();
+    }
   }
-
-
-
-   if (currentState2 == HIGH && previousState2 == LOW) {
-    objazul++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
-    Serial.print("COUNT:");
-    Serial.println(objazul);
-    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
-  }
-
-
-
-   if (currentState3 == HIGH && previousState3 == LOW) {
-    objrojo++; // Incrementa el conteo si la entrada cambia de LOW a HIGH
-    Serial.print("COUNT:");
-    Serial.println(objrojo);
-    delay(100); // Pequeño retraso para evitar múltiples conteos por rebote
-  }
-
-  previousState = currentState;
-   previousState2 = currentState2;
-    previousState3 = currentState3;
+}
+viousState3 = currentState3;
 }
