@@ -2,6 +2,7 @@
 
 
 
+
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
@@ -21,9 +22,10 @@ void handleRoot() {
   message += "<p>Contador productos rojo: " + String(objrojo) + "</p>";
   message += "<p>Contador productos blanco: " + String(objblanco) + "</p>";
   message += "<p>Contador productos azul: " + String(objazul) + "</p>";
-  message += "<img src='https://millonarios.com.co/wp-content/uploads/2024/09/Millonarios_vs_Patriotas-69-Falcao-300x240.jpg' alt='Imagen de Falcao' width='300' height='240' /> </p>";
-message += "<p><iframe width='560' height='315' src='https://www.youtube.com/embed/HKZ-qUX50UU' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>";
+  message += "<img src='https://s3.eu-central-1.amazonaws.com/robotica-es/uploads/items/ITEM_10972_FOTOPROD.jpg' alt='Imagen de banda' width='400' height='340' /> </p>";
+message += "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Escudo_de_Millonarios_Fútbol_Club.svg/2048px-Escudo_de_Millonarios_Fútbol_Club.svg.png' alt='Imagen de escudo millos' width='400' height='340' /> </p>";
 
+  
   
   server.send(200, "text/html", message);
 }
@@ -81,6 +83,4 @@ void loop() {
       objazul = countStr.toInt();
     }
   }
-}
-viousState3 = currentState3;
 }
